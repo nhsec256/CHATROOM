@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHS - Communication & Updates Portal</title>
+    <title>NHS - Supabase Communication Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #004699; --secondary: #ffc107; --dark: #0f172a; --light: #ffffff; --success: #10b981; }
@@ -35,19 +35,19 @@
         .auth-card select, .auth-card input { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center; font-weight: 600; }
         .btn-login { width: 100%; background: var(--primary); color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
 
-        /* Dashboard Grid Layout */
+        /* Dashboard Layout */
         .dashboard { display: none; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 992px) { .dashboard { grid-template-columns: 1.2fr 2fr; } }
         .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; margin-bottom: 20px; }
         h3 { color: var(--primary); margin-bottom: 15px; font-size: 13px; font-weight: 700; border-bottom: 2px solid var(--secondary); padding-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Setup Profile Form */
+        /* Profile Inputs */
         .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: 700; font-size: 11px; margin-bottom: 4px; color: #475569; text-transform: uppercase; }
         input, textarea, select { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 13px; outline: none; background: white; }
         
-        /* Chat Window System */
-        .chat-container { display: flex; flex-direction: column; hieght: 450px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+        /* Chat Design */
+        .chat-container { display: flex; flex-direction: column; height: 450px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
         .channel-bar { background: #edf2f7; padding: 10px; display: flex; gap: 10px; overflow-x: auto; border-bottom: 1px solid #e2e8f0; }
         .channel-btn { padding: 6px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap; }
         .channel-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
@@ -63,11 +63,10 @@
         .chat-input-bar input { flex-grow: 1; }
         .btn-send { background: var(--primary); color: white; border: none; padding: 0 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        /* Notice Board / Updates */
-        .update-item { background: #fffdf5; border-left: 4px solid var(--secondary); padding: 12px; border-radius: 0 8px 8px 0; border-top: 1px solid #fef08a; border-right: 1px solid #fef08a; border-bottom: 1px solid #fef08a; margin-bottom: 10px; }
+        /* Notice Board */
+        .update-item { background: #fffdf5; border-left: 4px solid var(--secondary); padding: 12px; border-radius: 0 8px 8px 0; border: 1px solid #fef08a; margin-bottom: 10px; }
         .update-header { font-size: 11px; font-weight: 700; color: #b45309; text-transform: uppercase; margin-bottom: 4px; }
         .update-body { font-size: 13px; line-height: 1.4; }
-
         .admin-box { background: #fff1f2; border: 1px dashed #f43f5e; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
     </style>
 </head>
@@ -81,7 +80,7 @@
             </div>
             <div class="header-text">
                 <h1>Namungoona High School</h1>
-                <p>Unified Communication & Updates Hub</p>
+                <p>Unified Communication & Updates Hub (Supabase Edition)</p>
             </div>
         </div>
         <div class="header-actions">
@@ -109,20 +108,20 @@
             <div class="card">
                 <h3>Your Institutional Profile</h3>
                 <div class="form-group">
-                    <label>Class / Room / Department</label>
+                    <label>Class / Department</label>
                     <input type="text" id="profClass" placeholder="e.g., S.4 West, Faculty, Admin Annex">
                 </div>
                 <div class="form-group">
-                    <label>Active Contact Phone/Email</label>
+                    <label>Active Contact Info</label>
                     <input type="text" id="profContact" placeholder="e.g., +256 700 000 000">
                 </div>
                 <div class="form-group">
-                    <label>Bio / Description Statement</label>
-                    <textarea id="profBio" rows="2" placeholder="Tell the institution something briefly about yourself..."></textarea>
+                    <label>Bio Statement</label>
+                    <textarea id="profBio" rows="2" placeholder="Brief details about yourself..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Avatar/Picture Link (URL)</label>
-                    <input type="text" id="profPic" placeholder="Paste any web image address url link">
+                    <label>Avatar / Profile Pic URL</label>
+                    <input type="text" id="profPic" placeholder="Paste any web image link address">
                 </div>
                 <button class="btn-login" onclick="updateProfile()" style="background-color: var(--success); padding: 8px;">Update Saved Profile Data</button>
             </div>
@@ -142,7 +141,7 @@
                 <h3>Administrative Bulletin Dispatcher</h3>
                 <div class="form-group">
                     <label>Broadcast Notice Content</label>
-                    <textarea id="noticeInput" rows="2" placeholder="Type school wide flash alerts or administrative announcements here..."></textarea>
+                    <textarea id="noticeInput" rows="2" placeholder="Type school wide flash alerts here..."></textarea>
                 </div>
                 <button class="btn-login" onclick="sendBroadcast()" style="background-color: #f43f5e; padding: 8px; margin-top: 0;">Publish Update Notice</button>
             </div>
@@ -151,8 +150,7 @@
                 <h3>Official Institutional Updates</h3>
                 <div id="bulletinDisplayZone">
                     <div class="update-item">
-                        <div class="update-header">System Notice</div>
-                        <div class="update-body">Welcome to the central real-time updates hub. Maintained by Senior Administrator Kamya Oscar.</div>
+                        <div class="update-body">Loading live bulletins and notices...</div>
                     </div>
                 </div>
             </div>
@@ -165,7 +163,7 @@
                     </div>
                     <div class="messages-display" id="msgBox"></div>
                     <div class="chat-input-bar">
-                        <input type="text" id="chatMsgInput" placeholder="Type clear, readable message transmission..." onkeydown="if(event.key === 'Enter') sendChatMessage()">
+                        <input type="text" id="chatMsgInput" placeholder="Type your message here..." onkeydown="if(event.key === 'Enter') sendChatMessage()">
                         <button class="btn-send" onclick="sendChatMessage()">Send</button>
                     </div>
                 </div>
@@ -174,30 +172,27 @@
     </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
     // ---------------------------------------------------------
-    // STEP 2 CONFIGURATION PLACEHOLDER
+    // INTEGRATED SUPABASE CREDENTIALS
     // ---------------------------------------------------------
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY_HERE",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
+    const SUPABASE_URL = "https://wexbtyfwwfctolunwkyu.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_d37v3PrS0nKNohCY5VzaMw_xh2FKHP8";
     
-    // Initialize Database System Connection Linkages
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    let supabase = null;
+    try {
+        if (typeof window.supabase !== 'undefined') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+    } catch (e) {
+        console.error("Failed to initialize Supabase client client library context:", e);
+    }
 
-    // App State Control Variables
-    let currentAccount = { username: "", role: "", class: "", contact: "", bio: "", pic: "🏫" };
+    let currentAccount = { username: "", role: "", class: "General", contact: "N/A", bio: "N/A", pic: "🏫" };
     let activeChannelRoom = "General";
+    let messageSubscription = null;
 
     function login() {
         const nameInput = document.getElementById("loginUsername").value.trim();
@@ -205,34 +200,32 @@
 
         if(!nameInput) return alert("Please supply user access identification name.");
 
-        // Credentials Evaluation Verification
         if(nameInput === "oscar123" || selectedRole === "Admin") {
             if(nameInput !== "oscar123") {
                 return alert("Access Denied! Incorrect Senior Admin Key Entry.");
             }
             currentAccount.username = "KAMYA OSCAR (Admin)";
             currentAccount.role = "Senior Admin";
-            document.getElementById("adminPanel").style.style.display = "flex";
+            document.getElementById("adminPanel").style.display = "flex";
         } else {
             currentAccount.username = nameInput.toUpperCase();
             currentAccount.role = selectedRole;
             document.getElementById("adminPanel").style.display = "none";
         }
 
-        // Adjust Portal DOM Layouts
         document.getElementById("authSection").style.display = "none";
         document.getElementById("appDashboard").style.display = "grid";
-        document.getElementById("quickStats").style.display = "grid";
         document.getElementById("logoutBtn").style.display = "block";
         
         const userTag = document.getElementById("userTag");
         userTag.style.display = "inline-block";
         userTag.innerText = `${currentAccount.username} [${currentAccount.role}]`;
 
-        // Sync and pull down standard live cloud structures
-        listenForRooms();
-        listenForNotices();
+        // Start pulling dynamic structures
+        fetchRooms();
+        fetchNotices();
         switchRoom('General');
+        listenToGlobalNotices();
     }
 
     function logout() {
@@ -240,120 +233,150 @@
     }
 
     function updateProfile() {
-        currentAccount.class = document.getElementById("profClass").value.trim() || "N/A";
+        currentAccount.class = document.getElementById("profClass").value.trim() || "General";
         currentAccount.contact = document.getElementById("profContact").value.trim() || "N/A";
         currentAccount.bio = document.getElementById("profBio").value.trim() || "N/A";
         currentAccount.pic = document.getElementById("profPic").value.trim() || "🏫";
-        alert("Institutional profile state updated locally for message tracking headers successfully!");
+        alert("Institutional profile state updated successfully!");
     }
 
-    // --- REALTIME CHAT ENGINE ENGINE MANAGEMENT ---
-    function createNewRoom() {
+    // --- CHAT ROOM PORTFOLIO SYSTEMS ---
+    async function createNewRoom() {
         const rawName = document.getElementById("newRoomName").value.trim();
         if(!rawName) return alert("Enter channel room title details.");
-        const cleanRoomId = rawName.replace(/[^a-zA-Z0-9]/g, "_");
+        const cleanRoomId = rawName.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
 
-        db.ref('rooms/' + cleanRoomId).set({ name: rawName });
+        const { error } = await supabase.from('rooms').insert([{ room_id: cleanRoomId, name: rawName }]);
+        if(error) return alert("Error creating room: " + error.message);
+        
         document.getElementById("newRoomName").value = "";
-        alert(`Room channel initialized: #${rawName}`);
+        fetchRooms();
     }
 
-    function listenForRooms() {
-        db.ref('rooms').on('value', snapshot => {
-            const roomBar = document.getElementById("roomBar");
-            roomBar.innerHTML = `<div class="channel-btn ${activeChannelRoom === 'General' ? 'active' : ''}" onclick="switchRoom('General')"># General Assembly</div>`;
-            
-            snapshot.forEach(child => {
-                const id = child.key;
-                const data = child.val();
-                const activeClass = (activeChannelRoom === id) ? 'active' : '';
-                roomBar.innerHTML += `<div class="channel-btn ${activeClass}" onclick="switchRoom('${id}')"># ${data.name}</div>`;
-            });
+    async function fetchRooms() {
+        const { data, error } = await supabase.from('rooms').select('*');
+        if(error) return;
+        
+        const roomBar = document.getElementById("roomBar");
+        roomBar.innerHTML = `<div class="channel-btn ${activeChannelRoom === 'General' ? 'active' : ''}" onclick="switchRoom('General')"># General Assembly</div>`;
+        
+        data.forEach(room => {
+            const activeClass = (activeChannelRoom === room.room_id) ? 'active' : '';
+            roomBar.innerHTML += `<div class="channel-btn ${activeClass}" onclick="switchRoom('${room.room_id}')"># ${room.name}</div>`;
         });
     }
 
-    function switchRoom(roomId) {
+    async function switchRoom(roomId) {
         activeChannelRoom = roomId;
         
-        // Refresh active graphical class state selections
         document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
         
-        db.ref('messages/' + activeChannelRoom).off(); // Terminate older listeners safely
-        
+        if (messageSubscription) {
+            supabase.removeChannel(messageSubscription);
+        }
+
         const msgBox = document.getElementById("msgBox");
         msgBox.innerHTML = "";
 
-        // Pull Down Active Stream Array
-        db.ref('messages/' + activeChannelRoom).limitToLast(40).on('child_added', snapshot => {
-            const m = snapshot.val();
-            const isMine = m.user === currentAccount.username ? 'mine' : '';
-            
-            let imgAvatar = m.pic.startsWith('http') ? `<img src="${m.pic}" class="msg-avatar">` : `<span style='font-size:11px;'>${m.pic}</span>`;
+        // Pull down message history
+        const { data, error } = await supabase.from('messages')
+            .select('*')
+            .eq('room_id', activeChannelRoom)
+            .order('created_at', { ascending: true })
+            .limit(50);
 
-            msgBox.innerHTML += `
-                <div class="msg-packet ${isMine}">
-                    <div class="msg-meta">
-                        ${imgAvatar} <span>${m.user} (${m.role}) [${m.class}]</span>
-                    </div>
-                    <div class="msg-text">${m.text}</div>
-                </div>
-            `;
-            msgBox.scrollTop = msgBox.scrollHeight;
-        });
+        if(!error && data) {
+            data.forEach(m => displayMessage(m));
+        }
+
+        // Setup real-time listeners
+        messageSubscription = supabase.channel(`public:messages:room_id=eq.${activeChannelRoom}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `room_id=eq.${activeChannelRoom}` }, payload => {
+                displayMessage(payload.new);
+            })
+            .subscribe();
     }
 
-    function sendChatMessage() {
+    function displayMessage(m) {
+        const msgBox = document.getElementById("msgBox");
+        const isMine = m.username === currentAccount.username ? 'mine' : '';
+        let imgAvatar = m.pic.startsWith('http') ? `<img src="${m.pic}" class="msg-avatar">` : `<span style='font-size:11px;'>${m.pic}</span>`;
+
+        msgBox.innerHTML += `
+            <div class="msg-packet ${isMine}">
+                <div class="msg-meta">
+                    ${imgAvatar} <span>${m.username} (${m.role}) [${m.class_name}]</span>
+                </div>
+                <div class="msg-text">${m.message_text}</div>
+            </div>
+        `;
+        msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    async function sendChatMessage() {
         const inp = document.getElementById("chatMsgInput");
         const txt = inp.value.trim();
         if(!txt) return;
 
-        db.ref('messages/' + activeChannelRoom).push({
-            user: currentAccount.username,
+        await supabase.from('messages').insert([{
+            room_id: activeChannelRoom,
+            username: currentAccount.username,
             role: currentAccount.role,
-            class: currentAccount.class || "General Info Set",
-            pic: currentAccount.pic || "🏫",
-            text: txt,
-            timestamp: Date.now()
-        });
+            class_name: currentAccount.class,
+            pic: currentAccount.pic,
+            message_text: txt
+        }]);
         inp.value = "";
     }
 
-    // --- NOTICE BROADCAST BULLETIN MANAGEMENT ---
-    function sendBroadcast() {
+    // --- NOTICE BOARD BROADCAST MANAGEMENT ---
+    async function sendBroadcast() {
         const msg = document.getElementById("noticeInput").value.trim();
         if(!msg) return alert("Notice message body field empty.");
 
-        db.ref('notices').push({
+        const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+        const { error } = await supabase.from('notices').insert([{
             author: currentAccount.username,
-            text: msg,
-            timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-        });
+            notice_text: msg,
+            timestamp_str: timeStr
+        }]);
+
+        if(error) alert("Error publishing update: " + error.message);
         document.getElementById("noticeInput").value = "";
-        alert("Official administrative dispatch bulletin successfully broadcasted to all active nodes!");
     }
 
-    function listenForNotices() {
-        db.ref('notices').limitToLast(5).on('value', snapshot => {
-            const container = document.getElementById("bulletinDisplayZone");
-            container.innerHTML = "";
-            
-            let noticesArray = [];
-            snapshot.forEach(child => { noticesArray.unshift(child.val()); });
+    async function fetchNotices() {
+        const { data, error } = await supabase.from('notices').select('*').order('id', { ascending: false }).limit(5);
+        if(error) return;
+        renderNotices(data);
+    }
 
-            if(noticesArray.length === 0) {
-                container.innerHTML = `<div class='update-item'><div class='update-body'>No active global school notifications posted yet today.</div></div>`;
-                return;
-            }
+    function renderNotices(noticesArray) {
+        const container = document.getElementById("bulletinDisplayZone");
+        container.innerHTML = "";
 
-            noticesArray.forEach(n => {
-                container.innerHTML += `
-                    <div class="update-item">
-                        <div class="update-header">🚨 System Bulletin Update — By ${n.author} [${n.timestamp}]</div>
-                        <div class="update-body">${n.text}</div>
-                    </div>
-                `;
-            });
+        if(!noticesArray || noticesArray.length === 0) {
+            container.innerHTML = `<div class='update-item'><div class='update-body'>No active global school notifications posted yet today.</div></div>`;
+            return;
+        }
+
+        noticesArray.forEach(n => {
+            container.innerHTML += `
+                <div class="update-item">
+                    <div class="update-header">🚨 System Bulletin Update — By ${n.author} [${n.timestamp_str}]</div>
+                    <div class="update-body">${n.notice_text}</div>
+                </div>
+            `;
         });
+    }
+
+    function listenToGlobalNotices() {
+        supabase.channel('public:notices')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'notices' }, () => {
+                fetchNotices();
+            })
+            .subscribe();
     }
 </script>
 </body>
