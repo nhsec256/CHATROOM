@@ -76,7 +76,7 @@
     <header class="master-header">
         <div class="header-left">
             <div class="school-logo">
-                <img src="NHS BADGES.PNG" alt="NHS Badge" onerror="this.parentNode.innerText='🏫';">
+                <img src="./NHS BADGES.PNG" alt="NHS Badge" onerror="this.style.display='none'; this.parentNode.innerText='🏫';">
             </div>
             <div class="header-text">
                 <h1>Namungoona High School</h1>
@@ -91,7 +91,7 @@
 
     <div id="authSection" class="auth-card">
         <div class="login-logo">
-            <img src="NHS BADGES.PNG" alt="NHS Badge" onerror="this.parentNode.innerText='🏫';">
+            <img src="./NHS BADGES.PNG" alt="NHS Badge" onerror="this.style.display='none'; this.parentNode.innerText='🏫';">
         </div>
         <h3>Portal Authentication</h3>
         <select id="loginRole">
@@ -175,26 +175,33 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-    // ---------------------------------------------------------
-    // INTEGRATED SUPABASE CREDENTIALS
-    // ---------------------------------------------------------
     const SUPABASE_URL = "https://wexbtyfwwfctolunwkyu.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_d37v3PrS0nKNohCY5VzaMw_xh2FKHP8";
     
     let supabase = null;
-    try {
-        if (typeof window.supabase !== 'undefined') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Wait until the Supabase library is loaded into the browser memory window
+    window.addEventListener('DOMContentLoaded', () => {
+        try {
+            if (typeof window.supabase !== 'undefined') {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else {
+                console.error("Supabase script CDN did not load properly.");
+            }
+        } catch (e) {
+            console.error("Initialization failed:", e);
         }
-    } catch (e) {
-        console.error("Failed to initialize Supabase client client library context:", e);
-    }
+    });
 
     let currentAccount = { username: "", role: "", class: "General", contact: "N/A", bio: "N/A", pic: "🏫" };
     let activeChannelRoom = "General";
     let messageSubscription = null;
 
     function login() {
+        if (!supabase) {
+            return alert("Database connecting... Please wait a few seconds and try clicking Enter again.");
+        }
+
         const nameInput = document.getElementById("loginUsername").value.trim();
         const selectedRole = document.getElementById("loginRole").value;
 
@@ -221,7 +228,6 @@
         userTag.style.display = "inline-block";
         userTag.innerText = `${currentAccount.username} [${currentAccount.role}]`;
 
-        // Start pulling dynamic structures
         fetchRooms();
         fetchNotices();
         switchRoom('General');
@@ -278,7 +284,6 @@
         const msgBox = document.getElementById("msgBox");
         msgBox.innerHTML = "";
 
-        // Pull down message history
         const { data, error } = await supabase.from('messages')
             .select('*')
             .eq('room_id', activeChannelRoom)
@@ -289,7 +294,6 @@
             data.forEach(m => displayMessage(m));
         }
 
-        // Setup real-time listeners
         messageSubscription = supabase.channel(`public:messages:room_id=eq.${activeChannelRoom}`)
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `room_id=eq.${activeChannelRoom}` }, payload => {
                 displayMessage(payload.new);
