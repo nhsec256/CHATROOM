@@ -76,11 +76,11 @@
     <header class="master-header">
         <div class="header-left">
             <div class="school-logo">
-                <img src="./NHS BADGES.png" alt="NHS Badge" onerror="this.style.display='none'; this.parentNode.innerText='🏫';">
+                <img src="NHS BADGES.png" alt="NHS Badge" onerror="this.style.display='none'; this.parentNode.innerText='🏫';">
             </div>
             <div class="header-text">
                 <h1>Namungoona High School</h1>
-                <p>NHS CHATROOM 2026</p>
+                <p>Unified Communication & Updates Hub</p>
             </div>
         </div>
         <div class="header-actions">
@@ -91,7 +91,7 @@
 
     <div id="authSection" class="auth-card">
         <div class="login-logo">
-            <img src="./NHS BADGES.png" alt="NHS Badge" onerror="this.style.display='none'; this.parentNode.innerText='🏫';">
+            <img src="NHS BADGES.png" alt="NHS Badge" onerror="this.style.display='none'; this.parentNode.innerText='🏫';">
         </div>
         <h3>Portal Authentication</h3>
         <select id="loginRole">
@@ -159,7 +159,7 @@
                 <h3>Interactive Chat Network Matrix</h3>
                 <div class="chat-container">
                     <div class="channel-bar" id="roomBar">
-                        <div class="channel-btn active" onclick="switchRoom('General')"># General Assembly</div>
+                        <div class="channel-btn active" onclick="switchRoom('general')"># General Assembly</div>
                     </div>
                     <div class="messages-display" id="msgBox"></div>
                     <div class="chat-input-bar">
@@ -172,7 +172,7 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
     const SUPABASE_URL = "https://wexbtyfwwfctolunwkyu.supabase.co";
@@ -180,26 +180,28 @@
     
     let supabase = null;
 
-    // Wait until the Supabase library is loaded into the browser memory window
-    window.addEventListener('DOMContentLoaded', () => {
-        try {
-            if (typeof window.supabase !== 'undefined') {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            } else {
-                console.error("Supabase script CDN did not load properly.");
-            }
-        } catch (e) {
-            console.error("Initialization failed:", e);
+    // Direct initialization helper setup
+    try {
+        if (typeof window.supabase !== 'undefined') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else if (typeof signupase === 'undefined' && window.Supabase) {
+            supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
-    });
+    } catch (e) {
+        console.error("Initialization check caught: ", e);
+    }
 
     let currentAccount = { username: "", role: "", class: "General", contact: "N/A", bio: "N/A", pic: "🏫" };
-    let activeChannelRoom = "General";
+    let activeChannelRoom = "general";
     let messageSubscription = null;
 
     function login() {
+        // Fallback backup instantiator check
+        if (!supabase && typeof window.supabase !== 'undefined') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
         if (!supabase) {
-            return alert("Database connecting... Please wait a few seconds and try clicking Enter again.");
+            return alert("The portal is still initializing its secure connection. Please try again in 3 seconds.");
         }
 
         const nameInput = document.getElementById("loginUsername").value.trim();
@@ -230,7 +232,7 @@
 
         fetchRooms();
         fetchNotices();
-        switchRoom('General');
+        switchRoom('general');
         listenToGlobalNotices();
     }
 
@@ -246,7 +248,7 @@
         alert("Institutional profile state updated successfully!");
     }
 
-    // --- CHAT ROOM PORTFOLIO SYSTEMS ---
+    // --- CHAT ROOM SYSTEMS ---
     async function createNewRoom() {
         const rawName = document.getElementById("newRoomName").value.trim();
         if(!rawName) return alert("Enter channel room title details.");
@@ -264,7 +266,7 @@
         if(error) return;
         
         const roomBar = document.getElementById("roomBar");
-        roomBar.innerHTML = `<div class="channel-btn ${activeChannelRoom === 'General' ? 'active' : ''}" onclick="switchRoom('General')"># General Assembly</div>`;
+        roomBar.innerHTML = `<div class="channel-btn ${activeChannelRoom === 'general' ? 'active' : ''}" onclick="switchRoom('general')"># General Assembly</div>`;
         
         data.forEach(room => {
             const activeClass = (activeChannelRoom === room.room_id) ? 'active' : '';
@@ -294,7 +296,7 @@
             data.forEach(m => displayMessage(m));
         }
 
-        messageSubscription = supabase.channel(`public:messages:room_id=eq.${activeChannelRoom}`)
+        messageSubscription = supabase.channel(`room-${activeChannelRoom}`)
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `room_id=eq.${activeChannelRoom}` }, payload => {
                 displayMessage(payload.new);
             })
@@ -376,7 +378,7 @@
     }
 
     function listenToGlobalNotices() {
-        supabase.channel('public:notices')
+        supabase.channel('global-notices')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'notices' }, () => {
                 fetchNotices();
             })
