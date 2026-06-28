@@ -528,6 +528,7 @@
         let activeAdminTab = 'papers';
         let isAdminLoggedIn = false;
         let pastPapersCache = [];
+        let reportsCache = []; // Holds the registered report card records
         let currentLevelFilter = 'all';
 
         function toggleMenu(menuId) {
@@ -586,6 +587,7 @@
                 document.getElementById('admin-gate').classList.add('hidden');
                 document.getElementById('admin-workspace').classList.remove('hidden');
                 fetchAdminPapersDashboard();
+                fetchAdminReportsDashboard();
             } else {
                 alert("Access Denied: Invalid Security Passkey.");
             }
@@ -652,16 +654,26 @@
             }
         }
 
-        // Dynamically processes Search Input + Category Filters simultaneously
+        /* Fetch Master Reports Log array */
+        async function fetchMasterReportsLog() {
+            try {
+                const response = await fetch(`${OSCBASE_URL}/retrieve/main/master_report_cards`);
+                const resData = await response.json();
+                if (resData.success && resData.value) {
+                    reportsCache = resData.value;
+                }
+            } catch(e) {
+                console.error("Unable to link report logs.");
+            }
+        }
+
         function applyFiltersAndSearch() {
             const searchQuery = document.getElementById('student-search-input')?.value.toLowerCase().trim() || '';
-            
             let filtered = pastPapersCache;
             
             if (currentLevelFilter !== 'all') {
                 filtered = filtered.filter(p => p.level === currentLevelFilter);
             }
-            
             if (searchQuery) {
                 filtered = filtered.filter(p => 
                     p.title.toLowerCase().includes(searchQuery) || 
@@ -669,7 +681,6 @@
                     p.year.toLowerCase().includes(searchQuery)
                 );
             }
-            
             renderStudentPapersGrid(filtered);
         }
 
@@ -702,7 +713,6 @@
                 btn.className = "px-5 py-2 rounded-full text-xs font-bold uppercase transition bg-white text-slate-600 border border-slate-200";
             });
             document.getElementById(`paper-filter-${lvl.toLowerCase().replace('-','')}`).className = "px-5 py-2 rounded-full text-xs font-bold uppercase transition bg-[#0a2a4b] text-white";
-
             applyFiltersAndSearch();
         }
 
@@ -714,9 +724,9 @@
             }
             tbody.innerHTML = pastPapersCache.map((p, idx) => `
                 <tr class="border-b hover:bg-slate-50 transition">
-                    <td class="p-3 font-bold text-slate-800 uppercase">${p.title}</td>
-                    <td class="p-3 font-semibold text-amber-600 uppercase text-xs">${p.level}</td>
-                    <td class="p-3 text-slate-400 font-medium text-xs">${p.term} - ${p.year}</td>
+                    <td class="p-3 font-bold text-slate-800 uppercase text-xs">${p.title}</td>
+                    <td class="p-3 font-semibold text-amber-600 uppercase text-[10px]">${p.level}</td>
+                    <td class="p-3 text-slate-400 font-medium text-[10px]">${p.term} - ${p.year}</td>
                     <td class="p-3 text-right">
                         <button onclick="deletePaper(${idx})" class="text-red-600 hover:text-red-800 font-bold"><i class="fas fa-trash-alt"></i></button>
                     </td>
@@ -724,7 +734,28 @@
             `).join('');
         }
 
-        /* BATCH UPLOADER: Handles single or multiple file selections sequentially */
+        /* Dynamically populates your new Reports Management Dashboard UI */
+        async function fetchAdminReportsDashboard() {
+            const tbody = document.getElementById('admin-reports-tbody');
+            if(!tbody) return;
+            
+            if(!reportsCache || reportsCache.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 font-medium text-xs">No active Student Report records registered yet.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = reportsCache.map((r, idx) => `
+                <tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-3 font-extrabold text-slate-800 text-xs uppercase">${r.student_name}</td>
+                    <td class="p-3 font-mono font-bold text-indigo-600 text-[11px]">${r.student_id}</td>
+                    <td class="p-3 text-slate-500 font-bold text-[10px] uppercase">${r.term} (${r.year})</td>
+                    <td class="p-3 text-slate-400 font-mono text-[9px] truncate max-w-[120px]">${r.lookup_key}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="deleteReportCard(${idx}, '${r.lookup_key}')" class="text-red-500 hover:text-red-700 font-bold text-xs"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
         async function handlePaperUpload() {
             const baseTitle = document.getElementById('p-title').value.trim();
             const l = document.getElementById('p-level').value;
@@ -739,15 +770,11 @@
 
             const btn = document.getElementById('uploadPaperBtn');
             btn.disabled = true;
-
             const totalFiles = fileInput.files.length;
             
-            // Iterate over all queued file items seamlessly
             for(let i = 0; i < totalFiles; i++) {
                 const file = fileInput.files[i];
                 btn.innerText = `Processing batch loop (${i + 1}/${totalFiles})...`;
-
-                // If text title form is empty, fallback to clean native filename
                 const computedTitle = baseTitle ? (totalFiles > 1 ? `${baseTitle} - Part ${i+1}` : baseTitle) : file.name.split('.').slice(0, -1).join('.');
 
                 try {
@@ -771,7 +798,6 @@
                 }
             }
 
-            // Sync structural manifest block states back into OscBase
             try {
                 await fetch(`${OSCBASE_URL}/store`, {
                     method: 'POST',
@@ -841,19 +867,37 @@
                 if (!uploadResult.success) throw new Error("Upload sequence failure.");
 
                 const serverFileUrl = `${OSCBASE_URL}${uploadResult.fileUrl}`;
-                const reportObject = { student_id: sid, student_name: name, year: year, term: term, file_url: serverFileUrl };
                 const targetKey = `report_${sid.replace(/\//g, '_')}_${year}_${term.replace(/\s/g, '')}`;
+                
+                const reportObject = { 
+                    student_id: sid, 
+                    student_name: name, 
+                    year: year, 
+                    term: term, 
+                    file_url: serverFileUrl,
+                    lookup_key: targetKey 
+                };
 
+                // Save individual Parent lookup point record entry
                 await fetch(`${OSCBASE_URL}/store`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ collection: 'main', key: targetKey, value: reportObject })
                 });
 
-                alert(`Academic record file compiled and saved for [${sid}] into OscBase successfully.`);
+                // Update management tracking dashboard log arrays
+                reportsCache.unshift(reportObject);
+                await fetch(`${OSCBASE_URL}/store`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ collection: 'main', key: 'master_report_cards', value: reportsCache })
+                });
+
+                alert(`Academic record filed. Parent ID needed to verify this sheet is precisely: \n\n 👉 ${sid}`);
                 document.getElementById('rep-sid').value = '';
                 document.getElementById('rep-name').value = '';
                 fileInput.value = '';
+                fetchAdminReportsDashboard();
             } catch (err) {
                 alert("OscBase connection pipeline dropped out processing payload data.");
             }
@@ -862,30 +906,76 @@
             submitBtn.innerText = "Deploy Live to OscBase";
         }
 
+        /* Deletes a Report Card from Dashboard tracking and breaks the Parent search string key */
+        async function deleteReportCard(idx, lookupKey) {
+            if(!confirm("Are you sure you want to purge this student report card record from registry?")) return;
+            reportsCache.splice(idx, 1);
+
+            try {
+                // Remove from core list
+                await fetch(`${OSCBASE_URL}/store`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ collection: 'main', key: 'master_report_cards', value: reportsCache })
+                });
+                
+                // Break lookup entry key string path
+                await fetch(`${OSCBASE_URL}/store`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ collection: 'main', key: lookupKey, value: null })
+                });
+
+                fetchAdminReportsDashboard();
+            } catch(e) {
+                alert("Failed to modify database records.");
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             // Setup Search Bar inside DOM above standard student listing matrix grid layout
-            const filterContainer = document.getElementById('paper-filter-all').parentNode;
-            const searchBarHTML = `
-                <div class="max-w-md mx-auto mt-4 px-2">
-                    <div class="relative flex items-center bg-white border border-slate-200 rounded-xl px-3 py-1 shadow-sm">
-                        <i class="fas fa-search text-slate-400 mr-2.5 text-xs"></i>
-                        <input type="text" id="student-search-input" oninput="applyFiltersAndSearch()" placeholder="Search title, term, or year..." class="w-full bg-transparent text-xs font-medium py-1.5 focus:outline-none">
-                    </div>
-                </div>`;
-            filterContainer.insertAdjacentHTML('afterend', searchBarHTML);
+            const filterContainer = document.getElementById('paper-filter-all')?.parentNode;
+            if (filterContainer) {
+                const searchBarHTML = `
+                    <div class="max-w-md mx-auto mt-4 px-2">
+                        <div class="relative flex items-center bg-white border border-slate-200 rounded-xl px-3 py-1 shadow-sm">
+                            <i class="fas fa-search text-slate-400 mr-2.5 text-xs"></i>
+                            <input type="text" id="student-search-input" oninput="applyFiltersAndSearch()" placeholder="Search title, term, or year..." class="w-full bg-transparent text-xs font-medium py-1.5 focus:outline-none">
+                        </div>
+                    </div>`;
+                filterContainer.insertAdjacentHTML('afterend', searchBarHTML);
+            }
+
+            // Create Reports Dashboard UI injection point inside Admin Reports Container view
+            const adminReportsContainer = document.getElementById('admin-sub-reports');
+            if (adminReportsContainer) {
+                const dashboardTableHTML = `
+                    <div class="mt-8 border-t pt-6 bg-white rounded-xl p-4 shadow-sm border border-slate-100">
+                        <h3 class="text-xs font-extrabold text-[#0a2a4b] uppercase mb-3 flex items-center gap-1.5">
+                            <i class="fas fa-id-card text-indigo-500"></i> Active Report Cards Registry Logs
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-extrabold text-slate-500 uppercase">
+                                        <th class="p-3">Student Name</th>
+                                        <th class="p-3">Parent Search ID</th>
+                                        <th class="p-3">Term & Year</th>
+                                        <th class="p-3">Data Registry Path</th>
+                                        <th class="p-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-reports-tbody">
+                                    <tr><td colspan="5" class="p-3 text-center text-xs text-slate-400 font-medium">Loading report records...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>`;
+                adminReportsContainer.insertAdjacentHTML('beforeend', dashboardTableHTML);
+            }
 
             fetchPastPapers();
-
-            const reveals = document.querySelectorAll('.fade-in-section');
-            const obs = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if(entry.isIntersecting) {
-                        entry.target.classList.add('reveal-active');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.05 });
-            reveals.forEach(r => obs.observe(r));
+            fetchMasterReportsLog();
         });
     </script>
 </body>
