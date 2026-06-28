@@ -1,0 +1,23 @@
+{
+  "name": "oscbase-enterprise",
+  "version": "1.0.0",
+  "description": "High-Performance Lightweight Database Engine for Educational Portals",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "database",
+    "json",
+    "lightweight",
+    "storage",
+    "school-portal"
+  ],
+  "author": "Namungoona High School Dev",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "commonjs"
+}
